@@ -76,8 +76,20 @@ def MaPremiereAPI():
 **Remarque importante** : Ce code ci-dessus est à ajouter dans la zone entre commentaires, c'est à dire **entre la ligne 10 à 15**.  
 
 Mettez à jour votre serveur (séquence 3) et tappez **https://{Votre URL}/contact** dans votre URL et observez le résultat dans votre navigateur.  
+Notion acquises lors de cet exercice : Vous avez appris lors de cet exercice à créer des API (c'est à dire des routes) dans une application Python. Vous pouvez créer autant d'API (de routes) que vous le souhaitez dans votre application Python.  
+  
+<sub>──────────</sub>
+### Exercice 2 : Les données d'une API   
+### Objectif : Utiliser les données issues d'une API externes pour créer une route adaptée à vos besoins  
+Pour commencer, copier l'URL ci-dessous dans un nouvel onglet de votre navigateur et observez le résultat :  
+```
+https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&hourly=temperature_2m
+```
+Il s'agit ici des prévisions de températures pour la ville de Paris pour les 7 prochains jours. Vous observerez que nous utilisons une API gratuite fourni par **api.open-meteo.com**. C'est typiquement le format que vous trouverez dans le cadre des services de métriques (Données issues de serveurs, de réseaux, de stockages, etc..).  
+  
+Les API fournissent en général des données au format JSON. JSON est un format structuré avec des étiquettes (également appelé des keys) et ont pour objectif de fournir des données "brut". **Prenez ici quelques minutes pour "comprendre" la structure de ces données JSON et identifer les clés et les données.**
 
-
+  
 ------------------------------------------------------------------------------------------------------
 PROJET METRIQUES
 ------------------------------------------------------------------------------------------------------
