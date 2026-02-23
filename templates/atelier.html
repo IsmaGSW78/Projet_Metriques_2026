@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Métrologie — Saint-Étienne</title>
+
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+
+  <style>
+    body {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 40px;
+        color: #333;
+    }
+    .dashboard-container {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        max-width: 1000px;
+        margin: auto;
+    }
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+    }
+    #chart_div {
+        width: 100%;
+        height: 500px;
+        margin-top: 20px;
+    }
+    #status {
+        text-align: center;
+        margin-top: 15px;
+        font-weight: bold;
+        color: #16a085;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="dashboard-container">
+      <h1>🌬️ Vitesse du vent à Saint-Étienne (48 prochaines heures)</h1>
+      <div id="chart_div"></div>
+      <div id="status">📡 Connexion à l'API Open-Meteo en cours...</div>
+  </div>
+
+  <script>
+    // Chargement du package corechart (qui inclut l'AreaChart)
+    google.charts.load('current', { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(initDashboard);
+
+    async function initDashboard() {
+      try {
+        // 1. Appel direct à l'API Open-Meteo pour Saint-Étienne
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=45.4397&longitude=4.3872&hourly=wind_speed_10m&timezone=Europe%2FParis";
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error("Erreur lors de la récupération des données");
+        
+        const json = await response.json();
+
+        // 2. Traitement des données (On prend les 48 premières heures pour un affichage propre)
+        const times = json.hourly.time.slice(0, 48);
+        const windSpeeds = json.hourly.wind_speed_10m.slice(0, 48);
+
+        const rows = times.map((timeStr, index) => {
+            // Conversion de la chaîne "YYYY-MM-DDTHH:MM" en objet Date Javascript
+            const [datePart, timePart] = timeStr.split('T');
+            const [y, m, d] = datePart.split('-').map(Number);
+            const [hh, mm] = timePart.split(':').map(Number);
+            
+            // Attention : les mois en JS commencent à 0 (janvier = 0)
+            const dateObj = new Date(y, m - 1, d, hh, mm, 0);
+            return [dateObj, windSpeeds[index]];
+        });
+
+        // 3. Dessin du graphique
+        drawAreaChart(rows);
+
+      } catch (err) {
+        document.getElementById('status').textContent = "❌ Erreur : " + err.message;
+        document.getElementById('status').style.color = "red";
+        console.error(err);
+      }
+    }
+
+    function drawAreaChart(rows) {
+      const data = new google.visualization.DataTable();
+      data.addColumn('datetime', 'Heure');
+      data.addColumn('number', 'Vitesse du vent (km/h)');
+      data.addRows(rows);
+
+      const options = {
+        title: 'Prévisions du vent (km/h)',
+        colors: ['#00a8ff'], // Une belle couleur bleue "vent"
+        legend: { position: 'bottom' },
+        hAxis: {
+          title: 'Date & Heure',
+          format: 'dd/MM HH:mm', // Format lisible français
+          gridlines: { color: 'transparent' }
+        },
+        vAxis: {
+          title: 'Vitesse (km/h)',
+          minValue: 0
+        },
+        // Options spécifiques à l'AreaChart
+        areaOpacity: 0.4, 
+        animation: {
+            startup: true,
+            duration: 1000,
+            easing: 'out'
+        }
+      };
+
+      // CRÉATION DU GRAPHIQUE EN AIRES (AreaChart)
+      const chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+
+      document.getElementById('status').textContent = `✅ Dashboard opérationnel — ${rows.length} heures de prévisions chargées.`;
+    }
+  </script>
+</body>
+</html>
